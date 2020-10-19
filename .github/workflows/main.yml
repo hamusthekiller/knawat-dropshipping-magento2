@@ -13,13 +13,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Release Name
-        id: release_name
-        run: |
-          - echo '::set-output name=NAME::${{ github.ref }}'
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          zip --junk-paths knawat-dropshipping-${{ steps.release_name.outputs.NAME }} README.md
+          zip --junk-paths knawat-dropshipping-${{ github.ref | sed 's/refs\/tags\///g'}} README.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -27,7 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: ${{ steps.release_name.outputs.NAME }}
+          release_name: ${{ github.ref }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
@@ -37,6 +33,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./knawat-dropshipping-${{ steps.release_name.outputs.NAME }}.zip
-          asset_name: knawat-dropshipping-${{ steps.release_name.outputs.NAME }}.zip
+          asset_path: ./knawat-dropshipping-${{ github.ref | sed 's/refs\/tags\///g'}}.zip
+          asset_name: knawat-dropshipping-${{ github.ref | sed 's/refs\/tags\///g'}}.zip
           asset_content_type: application/zip
